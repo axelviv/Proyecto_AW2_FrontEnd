@@ -1,8 +1,11 @@
+/* Apis */
+import { getProductos } from '../api/productosApi.js';
 
 /* Components */
 import { navBarComponent } from "../Components/navBar.js"
 import { cardComponent } from "../Components/cards.js"
 import { cerrarSesion } from "./users/logout.js"
+
 
 
 /* NavBar */
@@ -14,10 +17,10 @@ window.addEventListener('load', () => {
 
 
     /* -----------------------Bienvenida al user----------------------------- */
-    // Recuperar el usuario logueado desde sessionStorage
+    //Recuperar el usuario logueado desde sessionStorage
     const logueado = JSON.parse(sessionStorage.getItem('usuarioLogueado'));
 
-    // Para seleccionar los enlaces del navbar y el boton de cerrar sesion
+    //Para seleccionar los enlaces del navbar y el boton de cerrar sesion
     const loginLink = document.getElementById('login-link'); // Enlace de "Ingresar"
     const registerLink = document.getElementById('register-link'); // Enlace de "Registrarse"
     const botonLogout = document.getElementById('logout'); // Botón de "Cerrar Sesión"
@@ -25,12 +28,12 @@ window.addEventListener('load', () => {
     if (logueado) {
 
         const mensajeBienvenida = document.getElementById('bienvenida');
-        // Mostrar mensaje de bienvenida en el navbar
+        //Mostrar mensaje de bienvenida en el navbar
         if (mensajeBienvenida) {
             mensajeBienvenida.textContent = `Bienvenido, ${logueado.nombre}`;
         }
 
-        // Ocultar los enlaces en el navbar
+        //Ocultar los enlaces en el navbar
         if (loginLink) {
             loginLink.style.display = 'none';
         }
@@ -39,7 +42,7 @@ window.addEventListener('load', () => {
             registerLink.style.display = 'none';
         }
 
-        // Mostrar el boton de Cerrar Sesion en el navbar
+        //Mostrar el boton de Cerrar Sesion en el navbar
         if (botonLogout) {
             botonLogout.style.display = 'inline-block';
         }
@@ -56,91 +59,91 @@ window.addEventListener('load', () => {
     cerrarSesion();
 
 
+
     /* -----------------------Cards----------------------------- */
-    let cardContainerProductos = document.querySelector('#card-productos')
 
+    let cardContainerProductos = document.querySelector('#card-productos');
 
+    (async () => {
+        try {
+            const data = await getProductos();
+            if (!data) throw new Error("No se pudo cargar productos");
 
-    fetch("/Components/productos.json").then(res => res.json()).then(dat => {
+            const selectFiltro = document.getElementById('filtro-categoria');
 
-        //Secciones de Productos
+            const productosPorCategoria = {
+                libros: data.cardsElementsProductos.libros,
+                señaladores: data.cardsElementsProductos.señaladores,
+                fundas: data.cardsElementsProductos.fundas
+            };
 
-        const selectFiltro = document.getElementById('filtro-categoria');
+            const todosLosProductos = [
+                ...productosPorCategoria.libros,
+                ...productosPorCategoria.señaladores,
+                ...productosPorCategoria.fundas
+            ];
 
-        const productosPorCategoria = {
-            libros: dat.cardsElementsProductos.libros,
-            señaladores: dat.cardsElementsProductos.señaladores,
-            fundas: dat.cardsElementsProductos.fundas
-        }
-
-        const todosLosProductos = [
-            ...productosPorCategoria.libros,
-            ...productosPorCategoria.señaladores,
-            ...productosPorCategoria.fundas
-        ];
-
-        //Funcion para mezclar los productos
-        function mezclarArray(array) {
-            return array.sort(() => Math.random() - 0.5);
-        }
-
-        //Mezclar productos
-        let productosMezclados = mezclarArray(todosLosProductos);
-
-        //Funcion para mostrar productos
-        function renderProductos(lista) {
-            cardContainerProductos.innerHTML = cardComponent(lista);
-        }
-
-        //Mostrar todos los productos al inicio
-        renderProductos(productosMezclados);
-
-        //Mostrar productos segun el filtro
-        selectFiltro.addEventListener('change', (e) => {
-            const valor = e.target.value;
-
-            if (valor === 'todos') {
-                renderProductos(productosMezclados);
-            } else {
-                renderProductos(mezclarArray(productosPorCategoria[valor]));
+            //Funcion para mezclar productos
+            function mezclarArray(array) {
+                return array.sort(() => Math.random() - 0.5);
             }
-        });
-    }).catch(error => {
-        console.log(error);
-    });
 
+            let productosMezclados = mezclarArray(todosLosProductos);
+
+            function renderProductos(lista) {
+                cardContainerProductos.innerHTML = cardComponent(lista);
+            }
+
+            //Mostrar todos los productos al cargar
+            renderProductos(productosMezclados);
+
+            //Mostrar productos por categoría
+            selectFiltro.addEventListener('change', (e) => {
+                const valor = e.target.value;
+
+                if (valor === 'todos') {
+                    renderProductos(productosMezclados);
+                } else {
+                    renderProductos(mezclarArray(productosPorCategoria[valor]));
+                }
+            });
+
+        } catch (error) {
+            console.error('Error al cargar productos:', error);
+        }
+    })();
 
 
     /* -----------------------Listado----------------------------- */
-    fetch('/Components/productos.json')
-        .then(response => response.json())
-        .then(data => {
+    (async () => {
+        try {
+            const data = await getProductos();
+
             const tabla = document.getElementById("tabla-productos");
-            if (!tabla) return;  //Evitar error si no existe el elemento
+            if (!tabla) return;
+
+            if (!data) throw new Error('No se recibieron datos de productos');
 
             const productosPorCategoria = data.cardsElementsProductos;
 
-            //Crear un string con todas las filas
             let filas = '';
 
             Object.values(productosPorCategoria).forEach(categoria => {
                 categoria.forEach(producto => {
                     filas += `
-                    <tr>
-                        <td>${producto.title}</td>
-                        <td>${producto.price}</td>
-                    </tr>
-                `;
+          <tr>
+            <td>${producto.title}</td>
+            <td>${producto.price}</td>
+          </tr>
+        `;
                 });
             });
 
-            //Asignar todo el contenido de una vez
             tabla.innerHTML = filas;
-        })
-        .catch(error => {
+        } catch (error) {
             console.error("Error al cargar productos:", error);
-        });
-
+        }
+    })();
 
 
 })

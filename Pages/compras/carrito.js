@@ -1,4 +1,5 @@
 
+import { finalizarCompra } from '../../api/ventasApi.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     //Guardo el array del carrito del localstorage y si no existe lo guardo como un array vacio
@@ -106,4 +107,17 @@ const btnVaciarCarrito = document.getElementById('vaciarCarrito');
     alert('Carrito Vaciado!');
 
     location.reload();
+});
+
+
+const btnFinalizar = document.getElementById('finalizarCompra');
+
+btnFinalizar?.addEventListener('click', async () => {
+    try {
+        const respuesta = await finalizarCompra();
+        alert('Respuesta del servidor: ' + respuesta);
+        // Podés limpiar el carrito, redirigir, etc.
+    } catch (e) {
+        alert('Error al contactar con el backend');
+    }
 });
