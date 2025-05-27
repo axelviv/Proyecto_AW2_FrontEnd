@@ -1,5 +1,5 @@
 
-import { finalizarCompra } from '../../api/ventasApi.js';
+import { nuevaVenta } from '../../api/ventasApi.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     //Guardo el array del carrito del localstorage y si no existe lo guardo como un array vacio
@@ -110,14 +110,50 @@ const btnVaciarCarrito = document.getElementById('vaciarCarrito');
 });
 
 
+//Realizar Compra
 const btnFinalizar = document.getElementById('finalizarCompra');
 
 btnFinalizar?.addEventListener('click', async () => {
     try {
-        const respuesta = await finalizarCompra();
-        alert('Respuesta del servidor: ' + respuesta);
-        // Podés limpiar el carrito, redirigir, etc.
+        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+        if (carrito.length === 0) {
+            alert('El carrito está vacío.');
+            return;
+        }
+
+        let total = 0;
+        carrito.forEach((producto, index) => {
+            const cantidad = parseInt(document.querySelector(`input[data-index='${index}']`).value);
+            total += producto.precio * cantidad;
+        });
+
+        const ventaData = {
+            productos: carrito.map((producto, index) => ({
+                ...producto,
+                cantidad: parseInt(document.querySelector(`input[data-index='${index}']`).value)
+            })),
+            total: total,
+            direccion: "Dirección 123",  
+            id_usuario: 1                     
+        };
+
+        const respuesta = await nuevaVenta(ventaData);
+
+        if (respuesta?.mensaje) {
+            alert(respuesta.mensaje);
+            localStorage.removeItem('carrito');
+            location.reload();
+        } else {
+            alert('Ocurrió un error al registrar la venta.');
+        }
+
     } catch (e) {
-        alert('Error al contactar con el backend');
+        console.error(e);
+        alert('Error en el endpoint.');
     }
+
+
+
+
 });
