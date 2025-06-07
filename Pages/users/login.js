@@ -1,21 +1,43 @@
-import { users } from './users.js';
 
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault(); 
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
     const username = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    const user = users.find(user => user.email === username && user.password === password);
+    try {
+        const response = await fetch('http://localhost:3000/api/usuarios/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: username,
+                contraseña: password
+            })
+        });
 
-    if (user) {
-        // Guardar la información del usuario en sessionStorage
-        sessionStorage.setItem('usuarioLogueado', JSON.stringify(user));        
+        if (!response.ok) {
+            alert('Usuario o contraseña incorrectos.');
+            return;
+        }
 
-        alert(`Sesion Iniciada. Bienvenido ${user.nombre}`);
+        const data = await response.json();
+        
+        const nombreUsuario = data.nombre;
+        const apellidoUsuario = data.apellido;
+        
+        sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('idUsuario', data.id);
+        sessionStorage.setItem('nombreUsuario', data.nombre);
+        sessionStorage.setItem('apellidoUsuario', data.apellido);
+
+        alert(`Sesion Iniciada. Bienvenido ${nombreUsuario} ${apellidoUsuario}`);
 
         window.location.href = '../home.html';
-    } else {
-        alert('Usuario o contraseña incorrectos. Intenta nuevamente!');
+
+    } catch (error) {
+        console.error('Error al iniciar sesión:', error);
+        alert('Hubo un error al iniciar sesión.');
     }
 });

@@ -128,6 +128,8 @@ btnFinalizar?.addEventListener('click', async () => {
             total += producto.precio * cantidad;
         });
 
+        const idUsuario = sessionStorage.getItem('idUsuario');
+
         const ventaData = {
             productos: carrito.map((producto, index) => ({
                 ...producto,
@@ -135,7 +137,7 @@ btnFinalizar?.addEventListener('click', async () => {
             })),
             total: total,
             direccion: "Dirección 123",  
-            id_usuario: 1                     
+            id_usuario: idUsuario                     
         };
 
         const respuesta = await nuevaVenta(ventaData);

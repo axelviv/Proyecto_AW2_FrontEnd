@@ -17,20 +17,21 @@ window.addEventListener('load', () => {
 
 
     /* -----------------------Bienvenida al user----------------------------- */
-    //Recuperar el usuario logueado desde sessionStorage
-    const logueado = JSON.parse(sessionStorage.getItem('usuarioLogueado'));
+    //Recuperar el nombre y apellido del usuario logueado desde sessionStorage
+    const nombre = sessionStorage.getItem('nombreUsuario');
+    const apellido = sessionStorage.getItem('apellidoUsuario');
 
     //Para seleccionar los enlaces del navbar y el boton de cerrar sesion
     const loginLink = document.getElementById('login-link'); // Enlace de "Ingresar"
     const registerLink = document.getElementById('register-link'); // Enlace de "Registrarse"
     const botonLogout = document.getElementById('logout'); // Botón de "Cerrar Sesión"
 
-    if (logueado) {
+    if (nombre && apellido) {
 
         const mensajeBienvenida = document.getElementById('bienvenida');
         //Mostrar mensaje de bienvenida en el navbar
         if (mensajeBienvenida) {
-            mensajeBienvenida.textContent = `Bienvenido, ${logueado.nombre}`;
+            mensajeBienvenida.textContent = `Bienvenido, ${nombre} ${apellido}`;
         }
 
         //Ocultar los enlaces en el navbar
