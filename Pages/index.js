@@ -64,55 +64,53 @@ window.addEventListener('load', () => {
     /* -----------------------Cards----------------------------- */
 
     let cardContainerProductos = document.querySelector('#card-productos');
+    if (cardContainerProductos) {
+        (async () => {
+            try {
+                const data = await getProductos();
+                if (!data || !Array.isArray(data)) throw new Error("No se pudo cargar productos");
 
-    (async () => {
-        try {
-            const data = await getProductos();
-            if (!data) throw new Error("No se pudo cargar productos");
+                const selectFiltro = document.getElementById('filtro-categoria');
 
-            const selectFiltro = document.getElementById('filtro-categoria');
+                // Filtrar productos por categoría usando la propiedad Category
+                const productosPorCategoria = {
+                    libros: data.filter(p => p.Category === 'libros'),
+                    señaladores: data.filter(p => p.Category === 'señaladores'),
+                    fundas: data.filter(p => p.Category === 'fundas')
+                };
 
-            const productosPorCategoria = {
-                libros: data.cardsElementsProductos.libros,
-                señaladores: data.cardsElementsProductos.señaladores,
-                fundas: data.cardsElementsProductos.fundas
-            };
+                const todosLosProductos = data
 
-            const todosLosProductos = [
-                ...productosPorCategoria.libros,
-                ...productosPorCategoria.señaladores,
-                ...productosPorCategoria.fundas
-            ];
-
-            //Funcion para mezclar productos
-            function mezclarArray(array) {
-                return array.sort(() => Math.random() - 0.5);
-            }
-
-            let productosMezclados = mezclarArray(todosLosProductos);
-
-            function renderProductos(lista) {
-                cardContainerProductos.innerHTML = cardComponent(lista);
-            }
-
-            //Mostrar todos los productos al cargar
-            renderProductos(productosMezclados);
-
-            //Mostrar productos por categoría
-            selectFiltro.addEventListener('change', (e) => {
-                const valor = e.target.value;
-
-                if (valor === 'todos') {
-                    renderProductos(productosMezclados);
-                } else {
-                    renderProductos(mezclarArray(productosPorCategoria[valor]));
+                // Función para mezclar productos
+                function mezclarArray(array) {
+                    return array.sort(() => Math.random() - 0.5);
                 }
-            });
 
-        } catch (error) {
-            console.error('Error al cargar productos:', error);
-        }
-    })();
+                let productosMezclados = mezclarArray(todosLosProductos);
+
+                function renderProductos(lista) {
+                    cardContainerProductos.innerHTML = cardComponent(lista);
+                }
+
+                // Mostrar todos los productos al cargar
+                renderProductos(productosMezclados);
+
+                // Mostrar productos por categoría
+                selectFiltro.addEventListener('change', (e) => {
+                    const valor = e.target.value;
+
+                    if (valor === 'todos') {
+                        renderProductos(productosMezclados);
+                    } else {
+                        renderProductos(mezclarArray(productosPorCategoria[valor] || []));
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error al cargar productos:', error);
+            }
+        })();
+    }
 
 
     /* -----------------------Listado----------------------------- */
@@ -123,21 +121,17 @@ window.addEventListener('load', () => {
             const tabla = document.getElementById("tabla-productos");
             if (!tabla) return;
 
-            if (!data) throw new Error('No se recibieron datos de productos');
-
-            const productosPorCategoria = data.cardsElementsProductos;
+            if (!data || !Array.isArray(data)) throw new Error('No se recibieron datos de productos');
 
             let filas = '';
 
-            Object.values(productosPorCategoria).forEach(categoria => {
-                categoria.forEach(producto => {
-                    filas += `
+            data.forEach(producto => {
+                filas += `
           <tr>
             <td>${producto.title}</td>
             <td>${producto.price}</td>
           </tr>
         `;
-                });
             });
 
             tabla.innerHTML = filas;
@@ -145,6 +139,7 @@ window.addEventListener('load', () => {
             console.error("Error al cargar productos:", error);
         }
     })();
+
 
 
 })

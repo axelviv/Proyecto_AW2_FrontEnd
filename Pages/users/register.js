@@ -22,6 +22,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         });
 
         const data = await response.json();
+        console.log("Respuesta del backend:", data);
 
         if (data.status) {
 
